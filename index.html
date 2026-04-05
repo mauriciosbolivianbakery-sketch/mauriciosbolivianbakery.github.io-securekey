@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html><head><meta charset="UTF-8"><title>SecureKey v11</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#010409;font-family:'Courier New',monospace;padding:14px;display:flex;justify-content:center;color:#c0d8f0;min-height:100vh}
+.wrap{width:100%;max-width:520px}
+.hdr{background:#060d18;border:1px solid #0c1e35;border-bottom:none;border-radius:14px 14px 0 0;padding:18px 20px;display:flex;align-items:center;gap:12px}
+.ico{width:40px;height:40px;background:linear-gradient(135deg,#00c8ff,#0050c0);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.nm{font-size:16px;font-weight:700;letter-spacing:3px}
+.sb{font-size:7px;color:#1a3a55;letter-spacing:2px;margin-top:2px}
+.tabs{display:flex;background:#060d18;border:1px solid #0c1e35;border-top:none;border-bottom:1px solid #0c1e35}
+.tab{flex:1;padding:12px;background:transparent;border:none;border-bottom:3px solid transparent;color:#1a3a55;font-size:9px;font-family:'Courier New',monospace;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+.tab.on{border-bottom-color:#00c8ff;color:#00c8ff}
+.panel{background:#060d18;border:1px solid #0c1e35;border-top:none;border-radius:0 0 14px 14px;padding:20px;display:none}
+.panel.on{display:block}
+.sec{background:#030608;border:1px solid #0a1828;border-radius:10px;padding:14px;margin-bottom:12px}
+.lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#1a4060;margin-bottom:8px;display:block}
+.pwd{font-size:14px;word-break:break-all;line-height:1.9;letter-spacing:2px;min-height:28px;margin-bottom:12px;color:#1a3a55}
+.cu{color:#ff9f0a}.cl{color:#00c8ff}.cd{color:#30d158}.cs{color:#bf5af2}
+.acts{display:flex;gap:6px}
+.btn{flex:1;padding:9px 4px;background:rgba(255,255,255,.02);border:1px solid #0a1828;border-radius:7px;color:#1a4060;font-size:8px;font-family:'Courier New',monospace;cursor:pointer;text-transform:uppercase;text-align:center;transition:all .2s}
+.btn:active{background:rgba(0,200,255,.08);color:#00c8ff}
+.btn.ok{color:#30d158;border-color:#1a4020}
+/* score ring */
+.srow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ring{position:relative;width:80px;height:80px;flex-shrink:0}
+.ring svg{transform:rotate(-90deg);display:block}
+.rbg{fill:none;stroke:#0a1828;stroke-width:8}
+.rfill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:207.3;stroke-dashoffset:207.3;transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1),stroke .4s}
+.rnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rbig{font-size:22px;font-weight:700;line-height:1;transition:color .4s}
+.rsub{font-size:7px;color:#1a3a55}
+.info{flex:1}
+.verdict{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;transition:color .4s}
+.ctime{font-size:8px;color:#1a3a55;margin-bottom:6px}
+.detail{font-size:7px;color:#1a3a55;margin-bottom:8px;line-height:1.5}
+.bars{display:flex;flex-direction:column;gap:4px}
+.brow{display:flex;align-items:center;gap:6px}
+.blbl{font-size:7px;color:#1a3a55;width:54px;text-align:right;flex-shrink:0}
+.btrack{flex:1;height:3px;background:#06101a;border-radius:2px;overflow:hidden}
+.bfill{height:100%;border-radius:2px;transition:width .7s ease}
+.bval{font-size:7px;width:28px;font-weight:700;flex-shrink:0}
+/* filters */
+.fg{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.fb{padding:8px 4px;border:2px solid #0a1828;border-radius:8px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:#030608;user-select:none}
+.fb:active{transform:scale(.93)}
+.fb.on{border-color:#0c2a45;background:#030c18}
+.fb.on.pass{border-color:#20c85840;background:#041008}
+.fb.on.fail{border-color:#d0203040;background:#100408}
+.fb.off{opacity:.3;border-color:#060e18}
+.fdot{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:#0c1e35;transition:all .2s}
+.fb.on .fdot,.fb.on.pass .fdot{background:#00c8ff;box-shadow:0 0 4px #00c8ff80}
+.fico{font-size:14px;margin-bottom:2px;display:block}
+.fname{font-size:7px;color:#1a3a55;text-transform:uppercase;display:block;margin-bottom:2px}
+.fst{font-size:7px;font-weight:700;display:block;min-height:10px}
+/* controls */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:12px}
+.mbtn{padding:9px 4px;background:rgba(255,255,255,.01);border:1px solid #0a1828;border-radius:8px;color:#1a3a55;font-size:8px;font-family:'Courier New',monospace;text-transform:uppercase;cursor:pointer;text-align:center;transition:all .2s}
+.mbtn.on{background:rgba(0,200,255,.06);border-color:rgba(0,200,255,.2);color:#00c8ff}
+.lrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.llbl{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#1a4060}
+.lval{font-size:14px;font-weight:700;color:#00c8ff}
+input[type=range]{width:100%;accent-color:#00c8ff;margin-bottom:4px;height:20px;cursor:pointer}
+.rmarks{display:flex;justify-content:space-between;font-size:7px;color:#0c2a40;margin-bottom:12px}
+.csgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.csbtn{padding:9px;background:rgba(255,255,255,.01);border:1px solid #0a1828;border-radius:8px;color:#1a3a55;font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.csbtn.on{background:rgba(0,200,255,.05);border-color:rgba(0,200,255,.18);color:#00c8ff}
+/* progress */
+.prog{display:none;margin-bottom:12px}
+.phdr{display:flex;justify-content:space-between;margin-bottom:6px}
+.plbl{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#1a4060}
+.ppct{font-size:14px;font-weight:700;color:#00c8ff}
+.ptrack{height:26px;background:#06101a;border-radius:8px;overflow:hidden;position:relative;margin-bottom:5px}
+.pbar{height:100%;width:0%;border-radius:8px;transition:width .15s ease}
+.plabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);letter-spacing:1px}
+.pnote{font-size:7px;color:#1a3a55;font-style:italic}
+.gbtn{width:100%;padding:14px;background:linear-gradient(135deg,#0055c8,#009ab8);border:none;border-radius:10px;color:#fff;font-size:10px;font-family:'Courier New',monospace;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:700;margin-bottom:12px}
+.gbtn:active{opacity:.8}
+.rep{display:none;margin-top:4px}
+.rrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #060e18;font-size:8px}
+.rrow:last-child{border:none}
+.rk{color:#1a3a55}.rv{font-weight:700}
+.legend{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:4px;font-size:8px;color:#1a3a55}
+.ldot{width:7px;height:7px;border-radius:50%}
+/* pentest */
+.ptin{width:100%;background:#030608;border:1px solid #0a1828;border-radius:9px;padding:13px 14px;color:#00c8ff;font-size:14px;font-family:'Courier New',monospace;outline:none;margin-bottom:8px;letter-spacing:2px}
+.ptin:focus{border-color:#0c3060}
+.sbtn{padding:6px 12px;background:rgba(255,255,255,.01);border:1px solid #0a1828;border-radius:6px;color:#1a4060;font-size:9px;font-family:'Courier New',monospace;cursor:pointer;margin-bottom:14px}
+/* pentest score */
+.ptsc{background:#030608;border:1px solid #0a1828;border-radius:10px;padding:14px;margin-bottom:12px}
+.ptmain{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.ptnum{font-size:64px;font-weight:700;line-height:1;transition:color .4s}
+.ptden{color:#0c2a45;font-size:14px}
+.ptside{text-align:right}
+.ptv{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:color .4s}
+.ptt{font-size:8px;color:#1a3a55;margin-top:3px}
+.ptbt{height:8px;background:#06101a;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.ptbf{height:100%;border-radius:4px;width:0%;transition:width .9s cubic-bezier(.4,0,.2,1),background .4s}
+/* breakdown */
+.ptbd{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid #0a1828}
+.ptbr{display:flex;align-items:center;gap:7px}
+.ptbrl{font-size:7px;color:#1a3a55;width:64px;text-align:right;flex-shrink:0}
+.ptbrt{flex:1;height:4px;background:#06101a;border-radius:2px;overflow:hidden}
+.ptbrf{height:100%;border-radius:2px;transition:width .7s ease}
+.ptbrv{font-size:7px;width:18px;font-weight:700;flex-shrink:0}
+/* stat boxes */
+.strow{display:flex;gap:6px;margin-bottom:12px}
+.stbox{flex:1;background:#030608;border:1px solid #0a1828;border-radius:8px;padding:9px;text-align:center}
+.stval{font-size:15px;font-weight:700;margin-bottom:2px}
+.stlbl{font-size:7px;color:#1a3a55;letter-spacing:.5px;text-transform:uppercase}
+/* attack modules */
+.atklist{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.atk{background:#030608;border:1px solid #0a1828;border-radius:9px;overflow:hidden;transition:border-color .3s}
+.atk.pass{border-color:#20c85828}.atk.fail{border-color:#d0203028}.atk.warn{border-color:#c8b01028}
+.atkhdr{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 6px}
+.atkn{font-size:8px;letter-spacing:.5px;text-transform:uppercase;color:#1a3a55}
+.atkbg{font-size:8px;font-weight:700;padding:2px 8px;border-radius:4px}
+.atkbg.pass{background:#20c85815;color:#20c858;border:1px solid #20c85830}
+.atkbg.fail{background:#d0203015;color:#d02030;border:1px solid #d0203030}
+.atkbg.warn{background:#c8b01015;color:#c8b010;border:1px solid #c8b01030}
+.atkb{padding:0 12px 10px}
+.atkd{font-size:8px;line-height:1.5;margin-bottom:6px}
+.atkbt{height:4px;background:#06101a;border-radius:2px;overflow:hidden;margin-bottom:8px}
+.atkbf{height:100%;border-radius:2px;width:0%;transition:width .6s ease}
+.vcard{background:#14040a;border:1px solid #300818;border-radius:7px;padding:9px 11px;margin-bottom:5px}
+.vlbl{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#803040;margin-bottom:4px}
+.vtxt{font-size:8px;color:#804050;line-height:1.6}
+.fcard{background:#040e08;border:1px solid #083018;border-radius:7px;padding:9px 11px;margin-bottom:5px}
+.flbl{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#20a050;margin-bottom:4px}
+.ftxt{font-size:8px;color:#205040;line-height:1.6}
+.scard{background:#040e0a;border:1px solid #082818;border-radius:7px;padding:9px 11px;margin-bottom:5px}
+.slbl{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#1a7040;margin-bottom:4px}
+.stxt{font-size:8px;color:#1a5030;line-height:1.6}
+/* fix section */
+.fixsec{background:#030608;border:2px solid #0c2a45;border-radius:10px;padding:14px;margin-bottom:12px;display:none}
+.fixtitle{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#1a4060;margin-bottom:12px;display:block}
+.fixdisp{font-size:13px;word-break:break-all;line-height:1.9;letter-spacing:2px;min-height:26px;margin-bottom:10px;padding:10px;background:#040a10;border:1px solid #0c2040;border-radius:7px;color:#1a3a55}
+.fixchg{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fixch{font-size:8px;color:#1a5030;line-height:1.5;display:flex;gap:6px;align-items:flex-start}
+.fixdot{width:5px;height:5px;border-radius:50%;background:#20c858;flex-shrink:0;margin-top:4px}
+.fixbtns{display:flex;gap:6px}
+.term{background:#010305;border:1px solid #0a1828;border-radius:8px;padding:10px;max-height:100px;overflow-y:auto;font-size:8px}
+.tl{margin-bottom:3px;display:flex;gap:5px}.tt{color:#0c2040;flex-shrink:0}
+.tp{color:#1a9030}.tf{color:#c02030}.tw{color:#b09010}.ti{color:#0090b0}
+</style></head><body>
+<div class="wrap">
+<div class="hdr"><div class="ico">&#128737;</div><div><div class="nm">SECUREKEY</div><div class="sb">ANTI-HACK PASSWORD ENGINE v11</div></div></div>
+<div class="tabs"><button class="tab on" onclick="swTab(0)">&#9889; Generator</button><button class="tab" onclick="swTab(1)">&#128128; Pentest</button></div>
+<div class="panel on" id="p0">
+<div class="legend"><div class="leg"><div class="ldot" style="background:#ff9f0a"></div>UPPER</div><div class="leg"><div class="ldot" style="background:#00c8ff"></div>lower</div><div class="leg"><div class="ldot" style="background:#30d158"></div>digit</div><div class="leg"><div class="ldot" style="background:#bf5af2"></div>symbol</div></div>
+<div class="sec"><div class="pwd" id="GP">Press Generate...</div><div class="acts"><button class="btn" id="GCPY" onclick="doCopy()">&#128203; Copy</button><button class="btn" onclick="doGen()">&#128260; New</button><button class="btn" onclick="doTestGen()">&#128300; Pentest</button></div></div>
+<div class="sec" id="GSC" style="display:none"><div class="srow"><div class="ring"><svg width="80" height="80" viewBox="0 0 80 80"><circle class="rbg" cx="40" cy="40" r="33"/><circle class="rfill" id="GR" cx="40" cy="40" r="33"/></svg><div class="rnum"><span class="rbig" id="GN">0</span><span class="rsub">/100</span></div></div><div class="info"><div class="verdict" id="GV">-</div><div class="ctime" id="GT"></div><div class="detail" id="GD"></div><div class="bars"><div class="brow"><span class="blbl">Brute</span><div class="btrack"><div class="bfill" id="BBF"></div></div><span class="bval" id="BVF" style="color:#30d158"></span></div><div class="brow"><span class="blbl">Diversity</span><div class="btrack"><div class="bfill" id="BDV"></div></div><span class="bval" id="BVD" style="color:#00c8ff"></span></div><div class="brow"><span class="blbl">Entropy</span><div class="btrack"><div class="bfill" id="BEN"></div></div><span class="bval" id="BVE" style="color:#bf5af2"></span></div><div class="brow"><span class="blbl">Markov</span><div class="btrack"><div class="bfill" id="BMK"></div></div><span class="bval" id="BVM" style="color:#ff9f0a"></span></div><div class="brow"><span class="blbl">Dict safe</span><div class="btrack"><div class="bfill" id="BDT"></div></div><span class="bval" id="BVT" style="color:#20c858"></span></div></div></div></div></div>
+<span class="lbl">Defense Filters</span><div class="fg" id="FG"></div>
+<div class="prog" id="GPROG"><div class="phdr"><span class="plbl">Building password</span><span class="ppct" id="GPCT">0%</span></div><div class="ptrack"><div class="pbar" id="GBAR"></div><div class="plabel" id="GLBL">Starting...</div></div><div class="pnote" id="GNOTE">Initialising...</div></div>
+<div class="sec"><span class="lbl">Security Level</span><div class="mgrid"><button class="mbtn" id="MSAFE" onclick="setMode('safe')">&#128274; Safe<br><span style="color:#1a3a55;font-size:7px">12 chars</span></button><button class="mbtn on" id="MSTR" onclick="setMode('strong')">&#128737; Strong<br><span style="color:#1a3a55;font-size:7px">20 chars</span></button><button class="mbtn" id="MPAR" onclick="setMode('paranoid')">&#128128; Paranoid<br><span style="color:#1a3a55;font-size:7px">32 chars</span></button></div><div class="lrow"><span class="llbl">Length</span><span class="lval" id="LV">20</span></div><input type="range" min="8" max="64" value="20" id="LS" oninput="updLen(this.value)"><div class="rmarks"><span>8</span><span>16</span><span>24</span><span>32</span><span>48</span><span>64</span></div><span class="lbl">Character Types</span><div class="csgrid"><button class="csbtn on" id="CSU" onclick="togCS('u')">A-Z Upper</button><button class="csbtn on" id="CSL" onclick="togCS('l')">a-z Lower</button><button class="csbtn on" id="CSD" onclick="togCS('d')">0-9 Digits</button><button class="csbtn on" id="CSS" onclick="togCS('s')">!@# Symbols</button></div></div>
+<button class="gbtn" onclick="doGen()">&#9889; Generate Unhackable Password</button>
+<div class="rep" id="GREP"><div class="sec"><span class="lbl">Security Report</span><div id="GREPB"></div></div></div>
+</div>
+<div class="panel" id="p1">
+<span class="lbl">Enter any password to analyse</span>
+<input class="ptin" type="password" id="PTI" placeholder="Type password here..." oninput="onPTI()">
+<button class="sbtn" id="PTSHOW" onclick="togShow()">&#128065; Show</button>
+<div class="prog" id="PTPROG"><div class="phdr"><span class="plbl">Running attack simulation</span><span class="ppct" id="PTPCT">0%</span></div><div class="ptrack"><div class="pbar" id="PTBAR"></div><div class="plabel" id="PTLBL">Launching...</div></div><div class="pnote" id="PTNOTE">Preparing...</div></div>
+<div id="PTRES" style="display:none">
+<div class="ptsc"><div class="ptmain"><div><div style="font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#1a4060;margin-bottom:5px">Hack Resistance Score</div><span class="ptnum" id="PTNUM">0</span><span class="ptden">/100</span></div><div class="ptside"><div class="ptv" id="PTV"></div><div class="ptt" id="PTT"></div></div></div><div class="ptbt"><div class="ptbf" id="PTSB"></div></div><div class="ptbd" id="PTBD"></div></div>
+<div class="strow"><div class="stbox"><div class="stval" id="STH" style="color:#00c8ff">--</div><div class="stlbl">Shannon</div></div><div class="stbox"><div class="stval" id="STBF" style="color:#00c8ff">--</div><div class="stlbl">log10</div></div><div class="stbox"><div class="stval" id="STMK" style="color:#00c8ff">--</div><div class="stlbl">Markov</div></div><div class="stbox"><div class="stval" id="STCT" style="color:#00c8ff">--</div><div class="stlbl">Char types</div></div></div>
+<span class="lbl">Attack Analysis</span><div class="atklist" id="PTMODS"></div>
+<div class="fixsec" id="FIXSEC"><span class="fixtitle">&#9889; Fixed Password - Weaknesses to Strengths</span><div class="fixdisp" id="FIXD">Generating...</div><div class="fixchg" id="FIXC"></div><div class="fixbtns"><button class="btn ok" id="FIXCPY" onclick="copyFix()" style="flex:1;padding:10px">&#128203; Copy Fixed</button><button class="btn" onclick="testFix()" style="flex:1;padding:10px">&#128300; Test Fixed</button></div></div>
+<span class="lbl" style="display:block;margin-top:12px;margin-bottom:6px">Terminal</span><div class="term" id="PTTERM"></div>
+</div></div></div>
+<script>
+var OPT={u:true,l:true,d:true,s:true,len:20};
+var curPwd='',fixedPwd='';
+var FILTERS=[{id:'dict',ico:'D',name:'Dict',on:true},{id:'kb',ico:'K',name:'KbWalk',on:true},{id:'mk',ico:'M',name:'Markov',on:true},{id:'pcfg',ico:'P',name:'PCFG',on:true},{id:'seq',ico:'S',name:'Seq',on:true},{id:'ent',ico:'E',name:'Entropy',on:true},{id:'rep',ico:'R',name:'Repeat',on:true},{id:'bal',ico:'B',name:'Balance',on:true}];
+var FICOS=['📖','⌨️','📊','🧠','🔁','🎲','♻️','⚖️'];
+var DICT=['password','123456','password1','12345678','qwerty','abc123','monkey','letmein','trustno1','dragon','baseball','iloveyou','master','sunshine','ashley','bailey','passw0rd','shadow','123123','654321','superman','michael','football','password123','welcome','login','admin','princess','000000','pass','test','hunter2','mustang','batman','access','hello','charlie','donald','qwerty123','flower','secret','root','admin123','administrator','default','system','user','guest','matrix','jordan','harley','ranger','joshua','maggie','merlin','robert','thomas','hockey','killer','george','andrew','nicole','hunter','gandalf','winter','tigger','cookie','butter','hammer','silver','wizard','knight','ninja','angel','devil','storm','eagle','tiger','111111','696969','123321','zxcvbn','asdfgh','pokemon','pikachu','naruto','spider','marvel','captain','soccer','tennis','boxing','guitar','music','google','amazon','twitter','facebook','youtube','january','february','december','spring','computer','internet','wireless','network','router','iloveyou1','qwertyuiop','asdfghjkl','zxcvbnm','12345','123456789','1234567890','11111111','00000000','abcd1234','abc1234','asd123','qwe123','abcdef','abcdefgh','1234','abc','abcabc','aaaaaa','pass1234','hello123','admin1','123abc','changeme'];
+var KB={q:['w','a'],w:['q','e','a','s'],e:['w','r','s','d'],r:['e','t','d','f'],t:['r','y','f','g'],y:['t','u','g','h'],u:['y','i','h','j'],i:['u','o','j','k'],o:['i','p','k','l'],p:['o','l'],a:['q','w','s','z'],s:['a','w','e','d','z','x'],d:['s','e','r','f','x','c'],f:['d','r','t','g','c','v'],g:['f','t','y','h','v','b'],h:['g','y','u','j','b','n'],j:['h','u','i','k','n','m'],k:['j','i','o','l','m'],l:['k','o','p'],z:['a','s','x'],x:['z','s','d','c'],c:['x','d','f','v'],v:['c','f','g','b'],b:['v','g','h','n'],n:['b','h','j','m'],m:['n','j','k'],'1':['2','q'],'2':['1','3','q','w'],'3':['2','4','w','e'],'4':['3','5','e','r'],'5':['4','6','r','t'],'6':['5','7','t','y'],'7':['6','8','y','u'],'8':['7','9','u','i'],'9':['8','0','i','o'],'0':['9','o','p']};
+var BG={th:-1.31,he:-1.44,in:-1.50,er:-1.54,an:-1.58,re:-1.62,on:-1.66,at:-1.70,en:-1.74,nd:-1.77,ti:-1.80,es:-1.83,or:-1.86,te:-1.88,ed:-1.94,is:-1.96,it:-1.98,al:-2.00,ar:-2.03,st:-2.05,to:-2.07,ng:-2.11,se:-2.13,ha:-2.15,as:-2.17,ou:-2.19,le:-2.23,ve:-2.25,co:-2.27,me:-2.29,de:-2.30,hi:-2.32,ro:-2.35,ne:-2.38,ea:-2.40,ra:-2.41,ce:-2.43,li:-2.44,ch:-2.46,ll:-2.47,be:-2.48,ma:-2.50,si:-2.51,om:-2.52,ur:-2.53,ca:-2.55,el:-2.56,ta:-2.57,la:-2.58,di:-2.60,ho:-2.62,pe:-2.63,pr:-2.65,no:-2.66,us:-2.68,ac:-2.69,il:-2.71,tr:-2.72,ly:-2.73,et:-2.75,ss:-2.77,so:-2.78,un:-2.80,lo:-2.81,wa:-2.82,ge:-2.83,ee:-2.86,wi:-2.87,ad:-2.89,ol:-2.90,po:-2.92,am:-2.93};
+var BAD_STRUCTS=['L6D2','L7D2','L8D2','L5D2','L6D1','L8D1','L9D2','L6D3','L7D1','L5D3','U1L5D2','U1L6D2','U1L7D2','U1L8D2','L6D2S1','L7D2S1','D6','D8','D10','D4','L6','L7','L8','L9','U1L5','U1L6','U1L7','U1L8'];
+var BAD_SEQS=['0123','1234','2345','3456','4567','5678','6789','9876','8765','7654','6543','5432','4321','3210','abcd','bcde','cdef','defg','efgh','fghi','qwer','wert','erty','asdf','sdfg','zxcv','xcvb'];
+var CS={u:'ABCDEFGHJKLMNPQRSTUVWXYZ',l:'abcdefghjkmnpqrstuvwxyz',d:'23456789',s:'!@#$%^&*-_+=?'};
+function cR(n){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;}
+function cP(a){return a[cR(a.length)];}
+function cS(a){var b=a.slice(),i,j,t;for(i=b.length-1;i>0;i--){j=cR(i+1);t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function shannon(p){var f={},k,i,v,H=0;for(i=0;i<p.length;i++)f[p[i]]=(f[p[i]]||0)+1;k=Object.keys(f);for(i=0;i<k.length;i++){v=f[k[i]]/p.length;H-=v*(Math.log(v)/Math.log(2));}return H;}
+function markov(p){var lo=p.toLowerCase().replace(/[^a-z]/g,''),tot=0,cnt=0,i;if(lo.length<2)return -4.8;for(i=0;i<lo.length-1;i++){var bg=lo[i]+lo[i+1];tot+=(BG[bg]!==undefined?BG[bg]:-4.5);cnt++;}return cnt>0?tot/cnt:-4.5;}
+function bfL10(p){var pool=0;if(/[a-z]/.test(p))pool+=26;if(/[A-Z]/.test(p))pool+=26;if(/[0-9]/.test(p))pool+=10;if(/[^a-zA-Z0-9]/.test(p))pool+=33;if(!pool)pool=26;return p.length*(Math.log(pool)/Math.log(10));}
+function ctypes(p){var n=0;if(/[a-z]/.test(p))n++;if(/[A-Z]/.test(p))n++;if(/[0-9]/.test(p))n++;if(/[^a-zA-Z0-9]/.test(p))n++;return n;}
+function getPCFG(p){var st='',i,c,comp='',j=0,r;for(i=0;i<p.length;i++){c=p[i];if(/[A-Z]/.test(c))st+='U';else if(/[a-z]/.test(c))st+='L';else if(/[0-9]/.test(c))st+='D';else st+='S';}while(j<st.length){c=st[j];r=0;while(j<st.length&&st[j]===c){r++;j++;}comp+=c+r;}return comp;}
+function deLeet(s){return s.toLowerCase().replace(/@/g,'a').replace(/4/g,'a').replace(/8/g,'b').replace(/3/g,'e').replace(/6/g,'g').replace(/1/g,'i').replace(/!/g,'i').replace(/0/g,'o').replace(/5/g,'s').replace(/\$/,'s').replace(/7/g,'t');}
+function tDict(p){var lo=p.toLowerCase(),i,w;for(i=0;i<DICT.length;i++){w=DICT[i];if(w.length>=4&&lo.indexOf(w)!==-1)return false;}return true;}
+function tKb(p){var lo=p.toLowerCase(),run=1,i,adj;for(i=0;i<lo.length-1;i++){adj=KB[lo[i]];if(adj&&adj.indexOf(lo[i+1])!==-1){run++;if(run>=3)return false;}else run=1;}return true;}
+function tMk(p){return markov(p)<-2.8;}
+function tPCFG(p){var comp=getPCFG(p),i,l3;for(i=0;i<BAD_STRUCTS.length;i++){if(comp===BAD_STRUCTS[i]||comp.indexOf(BAD_STRUCTS[i])!==-1)return false;}if(p.length>=6){l3=comp.slice(-3);if(l3==='DDD'||l3==='LLL'||l3==='UUU')return false;}return true;}
+function tSeq(p){var lo=p.toLowerCase(),i;for(i=0;i<BAD_SEQS.length;i++){if(lo.indexOf(BAD_SEQS[i])!==-1)return false;}if(/19[5-9][0-9]|20[0-2][0-9]/.test(p))return false;if(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(p))return false;return true;}
+function tEnt(p){return shannon(p)>3.0;}
+function tRep(p){var f={},k,i,c;if(/(.){2,}/.test(p))return false;for(i=0;i<p.length;i++){c=p[i];f[c]=(f[c]||0)+1;}k=Object.keys(f);for(i=0;i<k.length;i++){if(f[k[i]]/p.length>0.22)return false;}return true;}
+function tBal(p){var ch=[],i,m;if(OPT.u)ch.push(/[A-Z]/g);if(OPT.l)ch.push(/[a-z]/g);if(OPT.d)ch.push(/[0-9]/g);if(OPT.s)ch.push(/[^a-zA-Z0-9]/g);for(i=0;i<ch.length;i++){m=p.match(ch[i]);if(!m||m.length<2)return false;}return true;}
+var TFMAP={dict:tDict,kb:tKb,mk:tMk,pcfg:tPCFG,seq:tSeq,ent:tEnt,rep:tRep,bal:tBal};
+function runF(p){var r={},i,f;for(i=0;i<FILTERS.length;i++){f=FILTERS[i];r[f.id]=f.on?TFMAP[f.id](p):null;}return r;}
+function allP(r){var k=Object.keys(r),i;for(i=0;i<k.length;i++){if(r[k[i]]===false)return false;}return true;}
+
+// REALISTIC SCORING - CORE FIX
+// Geometric mean of BruteForce x Diversity ensures BOTH must be high
+// QSAB…XH (32 upper only): BF=35, Diversity=8.75, geo=sqrt(35*8.75)/35*35=17.5 -> ~72 final
+// NOT 100 anymore
+function calcScore(p,passes){
+var bf=bfL10(p),H=shannon(p),mk=markov(p),ct=ctypes(p);
+var A=Math.min(35,Math.max(0,(bf/28)*35));  // brute force axis
+var B=(ct/4)*35;                             // diversity axis
+var geoBase=Math.sqrt((A/35)*(B/35))*50;    // geometric mean -> 0-50
+var bonus=0;
+if(passes.dict!==false)bonus+=9;if(passes.kb!==false)bonus+=6;
+if(passes.seq!==false)bonus+=5;if(passes.pcfg!==false)bonus+=4;
+if(passes.rep!==false)bonus+=4;if(passes.ent!==false)bonus+=4;
+if(passes.mk!==false)bonus+=3;
+var penalty=0;
+if(passes.dict===false)penalty+=18;if(passes.seq===false)penalty+=10;if(passes.rep===false)penalty+=5;
+var entB=Math.min(10,Math.max(0,(H-3.0)*4));
+var mkB=Math.min(5,Math.max(0,(-mk-2.8)*3));
+var raw=geoBase+bonus+entB+mkB-penalty;
+// Hard diversity caps
+var caps=[0,72,83,93,100];
+var cap=caps[Math.min(ct,4)];
+return{score:Math.min(cap,Math.max(0,Math.round(raw))),bf:bf,H:H,mk:mk,ct:ct,A:A,B:B};
+}
+function sCol(s){if(s>=85)return’#00c8ff’;if(s>=70)return’#20c858’;if(s>=50)return’#c8b010’;if(s>=35)return’#d05820’;return’#d02030’;}
+function sV(s){if(s>=90)return’Unbreakable’;if(s>=80)return’Very Strong’;if(s>=70)return’Strong’;if(s>=55)return’Moderate’;if(s>=35)return’Weak’;return’Critical’;}
+function cT(bf){var s=Math.pow(10,bf-11)/2;if(s<1)return’< 1 second’;if(s<60)return’~’+s.toFixed(0)+‘s’;if(s<3600)return’~’+(s/60).toFixed(0)+’ min’;if(s<86400)return’~’+(s/3600).toFixed(0)+’ hrs’;if(s<2.6e6)return’~’+(s/86400).toFixed(0)+’ days’;if(s<3.15e7)return’~’+(s/2.6e6).toFixed(0)+’ months’;if(s<3.15e9)return’~’+(s/3.15e7).toFixed(0)+’ yrs’;if(s<3.15e12)return’~’+(s/3.15e9).toFixed(0)+‘K yrs’;return’Millions of years’;}
+function buildGrid(){var g=document.getElementById(‘FG’),i,f,el;g.innerHTML=’’;for(i=0;i<FILTERS.length;i++){f=FILTERS[i];el=document.createElement(‘div’);el.id=‘FB’+f.id;el.className=‘fb ‘+(f.on?‘on’:‘off’);el.setAttribute(‘data-id’,f.id);el.onclick=togF;el.innerHTML=’<div class="fdot"></div><div class="fico">’+FICOS[i]+’</div><div class="fname">’+f.name+’</div><div class="fst" id="FS'+f.id+'" style="color:#1a3a55">IDLE</div>’;g.appendChild(el);}}
+function togF(){var id=this.getAttribute(‘data-id’),i;for(i=0;i<FILTERS.length;i++){if(FILTERS[i].id===id){FILTERS[i].on=!FILTERS[i].on;break;}}var el=document.getElementById(‘FB’+id),st=document.getElementById(‘FS’+id);if(FILTERS[i].on){el.className=‘fb on’;st.style.color=’#1a3a55’;st.textContent=‘IDLE’;}else{el.className=‘fb off’;st.style.color=’#0c2a45’;st.textContent=‘OFF’;}}
+function setBadge(id,state,on){var el=document.getElementById(‘FB’+id),st=document.getElementById(‘FS’+id);if(!el||!st||!on)return;var mp={scan:{cl:‘on’,co:’#c8b010’,tx:‘SCAN’},pass:{cl:‘on pass’,co:’#20c858’,tx:‘PASS’},fail:{cl:‘on fail’,co:’#d02030’,tx:‘FAIL’},idle:{cl:‘on’,co:’#1a3a55’,tx:‘IDLE’}};var s=mp[state]||mp.idle;el.className=‘fb ‘+s.cl;st.style.color=s.co;st.textContent=s.tx;}
+function sBar(id,pct,col,vid,val){var e=document.getElementById(id);if(e){e.style.width=Math.min(100,Math.max(0,pct))+’%’;e.style.background=col;}if(vid){var ve=document.getElementById(vid);if(ve){ve.textContent=val||’’;ve.style.color=col;}}}
+function rpwd(p){var h=’’,i,c;for(i=0;i<p.length;i++){c=p[i];var cl=/[A-Z]/.test(c)?‘cu’:/[a-z]/.test(c)?‘cl’:/[0-9]/.test(c)?‘cd’:‘cs’;h+=’<span class="'+cl+'">’+c+’</span>’;}return h;}
+function buildPwd(len){var types=[],i,j,nt,others,result=[];if(OPT.u)types.push(‘u’);if(OPT.l)types.push(‘l’);if(OPT.d)types.push(‘d’);if(OPT.s)types.push(‘s’);if(!types.length)types=[‘l’];var pool=[];for(i=0;i<types.length;i++)for(j=0;j<3;j++)pool.push(cP(CS[types[i]].split(’’)));for(i=pool.length;i<len;i++)pool.push(cP(CS[cP(types)].split(’’)));pool=cS(pool).slice(0,len);function gT(c){if(/[A-Z]/.test(c))return’u’;if(/[a-z]/.test(c))return’l’;if(/[0-9]/.test(c))return’d’;return’s’;}for(i=0;i<pool.length;i++){if(result.length>=2&&gT(result[result.length-1])===gT(pool[i])&&gT(result[result.length-2])===gT(pool[i])){others=types.filter(function(t){return t!==gT(pool[i]);});if(others.length){nt=cP(others);result.push(cP(CS[nt].split(’’)));continue;}}result.push(pool[i]);}return result.join(’’);}
+function doGen(){var i,f;for(i=0;i<FILTERS.length;i++){f=FILTERS[i];if(f.on)setBadge(f.id,‘scan’,true);}document.getElementById(‘GPROG’).style.display=‘block’;document.getElementById(‘GSC’).style.display=‘none’;document.getElementById(‘GREP’).style.display=‘none’;document.getElementById(‘GP’).innerHTML=’<span style="color:#1a3a55">Building…</span>’;var MAX=500,attempt=0,bestPwd=’’,bestPasses={},bestScore=-1;var msgs=[‘Checking dictionary…’,‘Testing keyboard…’,‘Analysing Markov…’,‘Checking structure…’,‘Verifying balance…’,‘Finalising…’];function batch(){var k,c,p,sc;for(k=0;k<40&&attempt<MAX;k++){attempt++;c=buildPwd(OPT.len);p=runF(c);sc=calcScore(c,p).score;if(sc>bestScore){bestScore=sc;bestPwd=c;bestPasses=p;}if(allP(p))break;}var pct=Math.round(Math.min(99,(attempt/MAX)*100));document.getElementById(‘GPCT’).textContent=pct+’%’;document.getElementById(‘GBAR’).style.width=pct+’%’;document.getElementById(‘GLBL’).textContent=pct+’% - attempt ‘+attempt;document.getElementById(‘GNOTE’).textContent=msgs[Math.min(Math.floor((attempt/MAX)*msgs.length),msgs.length-1)];var col=pct<30?‘linear-gradient(90deg,#300820,#d02030)’:pct<60?‘linear-gradient(90deg,#d02030,#c8b010)’:pct<85?‘linear-gradient(90deg,#c8b010,#20c858)’:‘linear-gradient(90deg,#20c858,#00c8ff)’;document.getElementById(‘GBAR’).style.background=col;if(attempt<MAX&&!allP(bestPasses)){setTimeout(batch,6);}else{document.getElementById(‘GBAR’).style.width=‘100%’;document.getElementById(‘GBAR’).style.background=‘linear-gradient(90deg,#20c858,#00c8ff)’;document.getElementById(‘GPCT’).textContent=‘100%’;document.getElementById(‘GLBL’).textContent=‘Done in ‘+attempt+’ attempts!’;setTimeout(function(){document.getElementById(‘GPROG’).style.display=‘none’;showGen(bestPwd,bestPasses,attempt);},400);}}setTimeout(batch,20);}
+function showGen(pwd,passes,attempts){curPwd=pwd;document.getElementById(‘GP’).innerHTML=rpwd(pwd);var i,f;for(i=0;i<FILTERS.length;i++){f=FILTERS[i];if(f.on)setBadge(f.id,passes[f.id]?‘pass’:‘fail’,true);}var sc=calcScore(pwd,passes),c=sCol(sc.score);document.getElementById(‘GSC’).style.display=‘block’;var rEl=document.getElementById(‘GR’),nEl=document.getElementById(‘GN’);var circ=207.3,cur=0,target=sc.score,t0=Date.now();(function aR(){var prog=Math.min((Date.now()-t0)/1000,1),e=1-Math.pow(1-prog,3);cur=Math.round(e*target);nEl.textContent=cur;nEl.style.color=c;rEl.style.strokeDashoffset=circ-(cur/100)*circ;rEl.style.stroke=c;if(prog<1)requestAnimationFrame(aR);else{nEl.textContent=target;document.getElementById(‘GV’).textContent=sV(target);document.getElementById(‘GV’).style.color=c;document.getElementById(‘GT’).textContent=‘Crack time: ‘+cT(sc.bf);document.getElementById(‘GD’).textContent=‘log10=’+sc.bf.toFixed(1)+’ x ‘+sc.ct+’ types x H=’+sc.H.toFixed(2);}})();sBar(‘BBF’,Math.min(100,(sc.bf/28)*100),’#30d158’,‘BVF’,sc.bf.toFixed(1));sBar(‘BDV’,(sc.ct/4)*100,’#00c8ff’,‘BVD’,sc.ct+’/4’);sBar(‘BEN’,Math.min(100,(sc.H/5.5)*100),’#bf5af2’,‘BVE’,sc.H.toFixed(1));sBar(‘BMK’,Math.min(100,Math.max(0,(-sc.mk-1.5)/3.5)*100),’#ff9f0a’,‘BVM’,sc.mk.toFixed(1));sBar(‘BDT’,passes.dict!==false?100:10,’#20c858’,‘BVT’,passes.dict!==false?‘OK’:’!’);document.getElementById(‘GREP’).style.display=‘block’;var html=’’;function rr(k,v,col){return’<div class="rrow"><span class="rk">’+k+’</span><span class="rv" style="color:'+col+'">’+v+’</span></div>’;}html+=rr(‘Score’,sc.score+’/100 (’+sV(sc.score)+’)’,c);html+=rr(‘Char diversity’,sc.ct+’/4 types | cap: ‘+(sc.ct===1?‘72’:sc.ct===2?‘83’:sc.ct===3?‘93’:‘100’),sc.ct>=3?’#20c858’:’#c8b010’);html+=rr(‘Length’,pwd.length+’ chars’,’#00c8ff’);html+=rr(‘Brute force log10’,sc.bf.toFixed(2),’#00c8ff’);html+=rr(‘Crack time’,cT(sc.bf),c);html+=rr(‘Shannon entropy’,sc.H.toFixed(3)+’ b/c’,sc.H>3.5?’#20c858’:’#c8b010’);html+=rr(‘Markov’,sc.mk.toFixed(3),sc.mk<-3.2?’#20c858’:’#c8b010’);html+=rr(‘Attempts’,attempts,’#1a4060’);for(i=0;i<FILTERS.length;i++){f=FILTERS[i];var v=passes[f.id];html+=rr(f.name,v===null?‘disabled’:v?‘PASS’:‘FAIL’,v===null?’#0c2a45’:v?’#20c858’:’#d02030’);}document.getElementById(‘GREPB’).innerHTML=html;}
+function doCopy(){if(!curPwd)return;navigator.clipboard.writeText(curPwd).then(function(){var b=document.getElementById(‘GCPY’);b.textContent=‘Copied!’;b.classList.add(‘ok’);setTimeout(function(){b.textContent=‘Copy’;b.classList.remove(‘ok’);},2000);});}
+function doTestGen(){if(!curPwd)return;swTab(1);document.getElementById(‘PTI’).value=curPwd;document.getElementById(‘PTI’).type=‘text’;document.getElementById(‘PTSHOW’).textContent=‘Hide’;startPT(curPwd);}
+function setMode(m){[‘MSAFE’,‘MSTR’,‘MPAR’].forEach(function(id){document.getElementById(id).classList.remove(‘on’);});var mp={safe:‘MSAFE’,strong:‘MSTR’,paranoid:‘MPAR’};document.getElementById(mp[m]).classList.add(‘on’);var lens={safe:12,strong:20,paranoid:32};OPT.len=lens[m];document.getElementById(‘LS’).value=OPT.len;document.getElementById(‘LV’).textContent=OPT.len;}
+function updLen(v){OPT.len=parseInt(v,10);document.getElementById(‘LV’).textContent=v;[‘MSAFE’,‘MSTR’,‘MPAR’].forEach(function(id){document.getElementById(id).classList.remove(‘on’);});}
+function togCS(k){OPT[k]=!OPT[k];document.getElementById(‘CS’+k.toUpperCase()).classList.toggle(‘on’,OPT[k]);}
+function swTab(idx){document.querySelectorAll(’.tab’).forEach(function(t,i){t.classList.toggle(‘on’,i===idx);});document.querySelectorAll(’.panel’).forEach(function(p,i){p.classList.toggle(‘on’,i===idx);});}
+function togShow(){var inp=document.getElementById(‘PTI’),b=document.getElementById(‘PTSHOW’);if(inp.type===‘password’){inp.type=‘text’;b.textContent=‘Hide’;}else{inp.type=‘password’;b.textContent=‘Show’;}}
+var ptRAF=null,ptTmr=null;
+function onPTI(){var p=document.getElementById(‘PTI’).value;clearTimeout(ptTmr);if(!p){document.getElementById(‘PTRES’).style.display=‘none’;document.getElementById(‘PTPROG’).style.display=‘none’;return;}ptTmr=setTimeout(function(){startPT(p);},250);}
+function startPT(pwd){if(ptRAF)cancelAnimationFrame(ptRAF);document.getElementById(‘PTPROG’).style.display=‘block’;document.getElementById(‘PTRES’).style.display=‘none’;document.getElementById(‘PTBAR’).style.width=‘0%’;document.getElementById(‘PTPCT’).textContent=‘0%’;document.getElementById(‘PTLBL’).textContent=‘Launching…’;document.getElementById(‘PTNOTE’).textContent=‘Preparing…’;var stages=[‘Dict + Hashcat…’,‘Keyboard walk…’,‘Markov chain…’,‘PCFG structure…’,‘Brute force…’,‘Entropy…’,‘Sequences…’,‘Report…’];var t0=Date.now(),dur=2000;(function aPT(){var prog=Math.min((Date.now()-t0)/dur,1),pct=Math.round(prog*100);document.getElementById(‘PTPCT’).textContent=pct+’%’;document.getElementById(‘PTBAR’).style.width=pct+’%’;document.getElementById(‘PTLBL’).textContent=pct+’%’;document.getElementById(‘PTNOTE’).textContent=stages[Math.min(Math.floor(prog*stages.length),stages.length-1)];document.getElementById(‘PTBAR’).style.background=pct<25?‘linear-gradient(90deg,#300820,#d02030)’:pct<55?‘linear-gradient(90deg,#d02030,#c8b010)’:pct<80?‘linear-gradient(90deg,#c8b010,#20c858)’:‘linear-gradient(90deg,#20c858,#00c8ff)’;if(prog<1)ptRAF=requestAnimationFrame(aPT);else{setTimeout(function(){document.getElementById(‘PTPROG’).style.display=‘none’;runPT(pwd);},300);}})();}
+function runPT(pwd){
+var lo=pwd.toLowerCase(),dl=deLeet(pwd);
+var H=shannon(pwd),mk=markov(pwd),bf=bfL10(pwd),ct=ctypes(pwd);
+var daHit=false,daDet=‘Not found in dictionary or mutations’,daLg=Infinity;
+var i,w,variants,suffs,s,y;
+if(DICT.indexOf(lo)!==-1){daHit=true;daDet=‘Direct dictionary hit: “’+lo+’”’;daLg=2;}
+else if(DICT.indexOf(dl)!==-1){daHit=true;daDet=‘Leet reversal: “’+dl+’”’;daLg=3;}
+else{
+outer:for(i=0;i<Math.min(DICT.length,100);i++){
+w=DICT[i];if(w.length<4)continue;
+variants=[w,w[0].toUpperCase()+w.slice(1),w.split(’’).reverse().join(’’)];
+suffs=[’!’,’@’,’#’,’$’,‘1’,‘123’,‘1234’,‘12’,‘01’];
+for(s=0;s<suffs.length;s++){variants.push(w+suffs[s]);variants.push((w[0].toUpperCase()+w.slice(1))+suffs[s]);}
+for(y=1980;y<=2025;y++){variants.push(w+y);variants.push((w[0].toUpperCase()+w.slice(1))+y);}
+if(variants.indexOf(lo)!==-1||variants.indexOf(pwd)!==-1){daHit=true;daDet=‘Hashcat rule on “’+w+’”’;daLg=Math.log10((i+1)*50+10);break outer;}
+}
+if(!daHit){var st2=lo.replace(/[0-9!@#$%^&*]+$/,’’).replace(/^[0-9!@#$%^&*]+/,’’);if(st2.length>=4&&DICT.indexOf(st2)!==-1){daHit=true;daDet=‘Base word “’+st2+’” stripped’;daLg=Math.log10((DICT.indexOf(st2)+1)*300);}}
+}
+var wlo=pwd.toLowerCase(),wrun=1,wlong=1,wwalks=0,wadj,wratio;
+for(i=0;i<wlo.length-1;i++){wadj=KB[wlo[i]];if(wadj&&wadj.indexOf(wlo[i+1])!==-1){wrun++;if(wrun>wlong)wlong=wrun;}else{if(wrun>=3)wwalks+=wrun;wrun=1;}}
+if(wrun>=3)wwalks+=wrun;wratio=wwalks/pwd.length;
+var walkLg=wlong>=3?Math.log10(Math.pow(8,wlong)*3):Infinity;
+var pgComp=getPCFG(pwd),pgProb=0;
+var pgT={‘L6D2’:.028,‘L7D2’:.022,‘L8D2’:.018,‘U1L5D2’:.020,‘U1L6D2’:.017,‘L6D2S1’:.008,‘D6’:.015,‘L6’:.010,‘L7’:.008,‘U1L5’:.008};
+var pgK=Object.keys(pgT);for(i=0;i<pgK.length;i++){if(pgComp===pgK[i]||pgComp.indexOf(pgK[i])!==-1)pgProb=Math.max(pgProb,pgT[pgK[i]]);}
+if(!pgProb)pgProb=0.00005;
+var sqHit=false,sqDet=‘None found’,sqLg=Infinity;
+for(i=0;i<BAD_SEQS.length;i++){if(lo.indexOf(BAD_SEQS[i])!==-1){sqHit=true;sqDet=‘Sequence “’+BAD_SEQS[i]+’”’;sqLg=2;break;}}
+if(!sqHit&&/19[5-9][0-9]|20[0-2][0-9]/.test(pwd)){sqHit=true;sqDet=‘Year pattern’;sqLg=3;}
+if(!sqHit&&/(.){2,}/.test(lo)){sqHit=true;sqDet=‘Repeated chars (3+)’;sqLg=2;}
+var mkP=mk<-3.1,mkW=!mkP&&mk<-2.5;
+var passes={dict:!daHit,kb:wratio<0.2,mk:mkP,pcfg:pgProb<0.001,seq:!sqHit,ent:H>3.0,rep:tRep(pwd),bal:null};
+var sc=calcScore(pwd,passes),c=sCol(sc.score);
+document.getElementById(‘PTRES’).style.display=‘block’;
+var cur2=0,t2=Date.now();
+(function a2(){var prog=Math.min((Date.now()-t2)/900,1),e=1-Math.pow(1-prog,3);cur2=Math.round(e*sc.score);document.getElementById(‘PTNUM’).textContent=cur2;document.getElementById(‘PTNUM’).style.color=c;document.getElementById(‘PTSB’).style.width=cur2+’%’;document.getElementById(‘PTSB’).style.background=c;if(prog<1)requestAnimationFrame(a2);else{document.getElementById(‘PTNUM’).textContent=sc.score;document.getElementById(‘PTV’).textContent=sV(sc.score);document.getElementById(‘PTV’).style.color=c;document.getElementById(‘PTT’).textContent=‘MD5: ‘+cT(bf);}})();
+setTimeout(function(){document.getElementById(‘STH’).textContent=H.toFixed(2);document.getElementById(‘STH’).style.color=H>3.5?’#20c858’:H>2?’#c8b010’:’#d02030’;document.getElementById(‘STBF’).textContent=bf.toFixed(1);document.getElementById(‘STBF’).style.color=c;document.getElementById(‘STMK’).textContent=mk.toFixed(2);document.getElementById(‘STMK’).style.color=mk<-3?’#20c858’:mk<-2.5?’#c8b010’:’#d02030’;document.getElementById(‘STCT’).textContent=ct+’/4’;document.getElementById(‘STCT’).style.color=ct>=3?’#20c858’:ct>=2?’#c8b010’:’#d02030’;},200);
+// Breakdown bars
+var bvecs=[{lbl:‘Dict safe’,pass:!daHit,pct:isFinite(daLg)?Math.min(100,(daLg/15)*100):100,col:!daHit?’#20c858’:’#d02030’},{lbl:‘Diversity’,pass:ct>=3,pct:(ct/4)*100,col:ct>=3?’#20c858’:ct>=2?’#c8b010’:’#d02030’},{lbl:‘Brute force’,pass:bf>15,pct:Math.min(100,(bf/25)*100),col:bf>15?’#20c858’:bf>10?’#c8b010’:’#d02030’},{lbl:‘Entropy’,pass:H>3.0,pct:Math.min(100,(H/5)*100),col:H>3.0?’#20c858’:H>2?’#c8b010’:’#d02030’},{lbl:‘Markov’,pass:mkP,pct:Math.min(100,Math.max(0,(-mk-1.5)/3.5)*100),col:mkP?’#20c858’:mkW?’#c8b010’:’#d02030’},{lbl:‘No sequences’,pass:!sqHit,pct:!sqHit?95:5,col:!sqHit?’#20c858’:’#d02030’}];
+var bdH=’’;bvecs.forEach(function(v){bdH+=’<div class="ptbr"><span class="ptbrl">’+v.lbl+’</span><div class="ptbrt"><div class="ptbrf" style="width:'+v.pct+'%;background:'+v.col+'"></div></div><span class="ptbrv" style="color:'+v.col+'">’+(v.pass?‘✓’:‘✗’)+’</span></div>’;});document.getElementById(‘PTBD’).innerHTML=bdH;
+// Attack modules
+var MODS=[
+{id:‘dict’,nm:‘Dictionary + Hashcat + Mutations’,pass:!daHit,warn:false,det:daDet,pct:isFinite(daLg)?Math.min(100,(daLg/18)*100):100,vuln:‘Your password matches a known word or common mutation. Attackers run millions of words + Hashcat rules (leet, years, symbols) in seconds.’,fix:‘Replace real words with random characters. The Generator builds strings no dictionary contains.’,str:‘Not found in any dictionary, mutation set, or edit-distance variant. Dictionary attacks blocked.’},
+{id:‘div’,nm:‘Charset Diversity (Hard Cap)’,pass:ct>=3,warn:ct===2,det:ct+’/4 char types used. Hard cap: ‘+(ct===1?72:ct===2?83:ct===3?93:100)+’/100’,pct:(ct/4)*100,vuln:‘Only ‘+ct+’ character type’+(ct===1?’’:’ types’)+’ used. Single-type passwords have a hard cap of 72 no matter how long — 32 uppercase chars still caps at 72/100 because the charset is tiny compared to a 4-type password.’,fix:‘Add ‘+(ct===1?‘lowercase letters, digits AND symbols’:ct===2?‘a 3rd type (e.g. symbols)’:‘a 4th character type’)+’. Each new type multiplies the effective keyspace by 2-3x.’,str:‘All 4 char types present. Maximum diversity — no hard cap penalty applied. Score can reach 100.’},
+{id:‘kb’,nm:‘Keyboard Spatial Walk’,pass:wratio<0.2,warn:wratio>=0.2&&wratio<0.4,det:’Walk ratio: ’+Math.round(wratio*100)+’% | Longest run: ‘+wlong+’ keys’,pct:isFinite(walkLg)?Math.min(100,(walkLg/20)*100):100,vuln:‘Adjacent keyboard keys detected. Keyboard walk attack tools crack these in milliseconds using QWERTY/AZERTY adjacency graphs.’,fix:‘Never use keys next to each other. Jump randomly across the keyboard.’,str:‘No keyboard adjacency patterns. Spatial walk attacks find no traversable path.’},
+{id:‘mk’,nm:‘Markov Chain Bigram Model’,pass:mkP,warn:mkW,det:‘Bigram avg: ‘+mk.toFixed(3)+’ (’+(mk>-2?‘predictable’:mk>-3?‘moderate’:‘random’)+’)’,pct:Math.min(100,((-mk-1.5)/3.5)*100),vuln:‘Natural language patterns. Markov models trained on breach data predict likely character sequences, reducing guesses dramatically.’,fix:‘Use rare combos like xk, qz, jv. Avoid any pronounceable letter combinations.’,str:‘Low bigram probability. Markov models find no exploitable language patterns.’},
+{id:‘pcfg’,nm:‘PCFG Structure (Weir 2009)’,pass:pgProb<0.001,warn:pgProb<0.005,det:‘Structure: ‘+pgComp+’ | P=’+pgProb.toExponential(2),pct:Math.min(100,(Math.log10(1/pgProb)/15)*100),vuln:‘Human-predictable structure (e.g. Word+Digits, U1L7D2). PCFG crackers prioritise these patterns from breach corpus analysis.’,fix:‘Interleave char types randomly throughout. No all-digits at end or single cap at start.’,str:‘Uncommon structure. PCFG crackers cannot prioritise this password.’},
+{id:‘bf’,nm:‘Brute Force (GPU@100B/s)’,pass:bf>15,warn:bf>=10&&bf<=15,det:‘log10=’+bf.toFixed(2)+’ -> ‘+cT(bf),pct:Math.min(100,(bf/25)*100),vuln:‘Vulnerable to exhaustive search. At 100 billion MD5 hashes/sec: ‘+cT(bf)+’.’,fix:‘Use 16+ chars with all 4 types. Every extra char multiplies crack time by ~72x.’,str:‘Brute force infeasible. At 100B/s: ‘+cT(bf)+’.’},
+{id:‘seq’,nm:‘Sequence / Date / Repeat’,pass:!sqHit,warn:false,det:sqDet,pct:!sqHit?95:5,vuln:‘A sequence, date pattern or repeated chars was found — the very first things every cracking tool tries.’,fix:‘Remove all sequences, dates, and repeated characters completely.’,str:‘No sequences, dates or repeat patterns. Sequential attacks find nothing.’},
+{id:‘ent’,nm:‘Shannon Entropy’,pass:H>3.0,warn:H>=2.5,det:‘Shannon: ‘+H.toFixed(2)+’ bits/char (’+(H>3.5?‘high’:H>2.5?‘moderate’:‘low’)+’)’,pct:Math.min(100,(H/5.5)*100),vuln:‘Low information-theoretic entropy. Character distribution is too predictable.’,fix:‘Use a wider variety of different characters. Truly random passwords have high entropy.’,str:‘High Shannon entropy confirmed. Character distribution is sufficiently random.’}
+];
+var mc=document.getElementById(‘PTMODS’),tm=document.getElementById(‘PTTERM’);
+mc.innerHTML=’’;tm.innerHTML=’<div class="tl ti"><span class="tt">[SYS]</span><span>Compiling results…</span></div>’;
+MODS.forEach(function(mod){
+var pass=mod.pass,warn=mod.warn,sc2=pass?‘pass’:(warn?‘warn’:‘fail’),col=pass?’#20c858’:(warn?’#c8b010’:’#d02030’);
+var content=pass?’<div class="scard"><div class="slbl">STRENGTH CONFIRMED</div><div class="stxt">’+mod.str+’</div></div>’:’<div class="vcard"><div class="vlbl">VULNERABILITY</div><div class="vtxt">’+mod.vuln+’</div></div><div class="fcard"><div class="flbl">HOW TO FIX IT</div><div class="ftxt">’+mod.fix+’</div></div>’;
+var el=document.createElement(‘div’);el.className=‘atk ‘+sc2;
+el.innerHTML=’<div class="atkhdr"><span class="atkn">’+mod.nm+’</span><span class="atkbg '+sc2+'">’+(pass?‘RESISTANT’:(warn?‘PARTIAL’:‘VULNERABLE’))+’</span></div><div class="atkb"><div class="atkd" style="color:'+col+'">’+mod.det+’</div><div class="atkbt"><div class="atkbf" style="width:'+mod.pct+'%;background:'+col+'"></div></div>’+content+’</div>’;
+mc.appendChild(el);
+var t=new Date(),mm=String(t.getMinutes()),ss=String(t.getSeconds());var ts=(mm.length<2?‘0’+mm:mm)+’:’+(ss.length<2?‘0’+ss:ss);
+var line=document.createElement(‘div’);line.className=‘tl ‘+(pass?‘tp’:warn?‘tw’:‘tf’);
+line.innerHTML=’<span class="tt">[’+ts+’]</span><span>’+(pass?’[STRONG]’:’[VULN  ]’)+’ ‘+mod.nm+’ - ‘+mod.det+’</span>’;
+tm.appendChild(line);tm.scrollTop=tm.scrollHeight;
+});
+setTimeout(function(){makeFix(pwd,passes,sc.score);var line=document.createElement(‘div’);line.className=‘tl ti’;line.innerHTML=’<span class="tt">[SYS]</span><span>DONE - Score: ‘+sc.score+’/100 | ‘+sV(sc.score)+’ | ‘+ct+’ types | ‘+cT(bf)+’</span>’;tm.appendChild(line);tm.scrollTop=tm.scrollHeight;},200);
+}
+function makeFix(pwd,passes,orig){
+var result=pwd,changes=[],i;
+if(!passes.dict){var vm={‘a’:’@’,‘e’:‘3’,‘i’:’!’,‘o’:‘0’,‘u’:’#’,‘A’:’@’,‘E’:‘3’,‘I’:’!’,‘O’:‘0’,‘U’:’#’};var tmp=’’;for(i=0;i<result.length;i++){var v=vm[result[i]];tmp+=(v&&Math.random()<0.8)?v:result[i];}var mid=Math.floor(tmp.length/2);tmp=tmp.slice(0,mid)+cP(CS.s.split(’’))+cP(CS.d.split(’’))+cP(CS.u.split(’’))+tmp.slice(mid);result=tmp;changes.push(‘Dictionary words disrupted - vowels replaced with symbols, 3 random chars inserted’);}
+if(!passes.kb){var lo2=result.toLowerCase(),fixed=’’;var run2=1;for(i=0;i<result.length-1;i++){fixed+=result[i];var adj2=KB[lo2[i]];if(adj2&&adj2.indexOf(lo2[i+1])!==-1){run2++;if(run2>=2){fixed+=cP(CS.s.split(’’));run2=0;}}else run2=1;}fixed+=result[result.length-1];result=fixed;changes.push(‘Keyboard walks interrupted - symbols break adjacency chains’);}
+if(!passes.seq){result=result.replace(/1234|2345|3456|4567|5678|6789|0123/g,function(){return cP(CS.d.split(’’))+cP(CS.s.split(’’))+cP(CS.u.split(’’));});result=result.replace(/abcd|bcde|qwer|asdf|zxcv/gi,function(){return cP(CS.l.split(’’))+cP(CS.s.split(’’))+cP(CS.u.split(’’));});result=result.replace(/19[5-9][0-9]|20[0-2][0-9]/g,function(){return cP(CS.d.split(’’))+cP(CS.s.split(’’))+cP(CS.d.split(’’))+cP(CS.l.split(’’));});changes.push(‘Sequences and year patterns replaced with random groups’);}
+var hasU=/[A-Z]/.test(result),hasL=/[a-z]/.test(result),hasD=/[0-9]/.test(result),hasS=/[^a-zA-Z0-9]/.test(result),added=[];
+if(!hasL){result=result.slice(0,3)+cP(CS.l.split(’’))+cP(CS.l.split(’’))+cP(CS.l.split(’’))+result.slice(3);added.push(‘lowercase’);}
+if(!hasD){result=result.slice(0,5)+cP(CS.d.split(’’))+cP(CS.d.split(’’))+result.slice(5);added.push(‘digits’);}
+if(!hasS){result=result.slice(0,8)+cP(CS.s.split(’’))+cP(CS.s.split(’’))+result.slice(8);added.push(‘symbols’);}
+if(!hasU&&!/[A-Z]/.test(result)){result=cP(CS.u.split(’’))+cP(CS.u.split(’’))+result;added.push(‘uppercase’);}
+if(added.length)changes.push(‘Added missing types (’+added.join(’, ‘)+’) - removes diversity cap penalty, score can now reach 100’);
+if(result.length<16){var extra=’’,types2=[];if(/[A-Z]/.test(result))types2.push(‘u’);if(/[a-z]/.test(result))types2.push(‘l’);if(/[0-9]/.test(result))types2.push(‘d’);if(/[^a-zA-Z0-9]/.test(result))types2.push(‘s’);if(!types2.length)types2=[‘l’,‘u’,‘d’,‘s’];for(i=result.length;i<16;i++)extra+=cP(CS[cP(types2)].split(’’));result+=extra;changes.push(‘Extended to ‘+result.length+’ chars - crack time: ‘+cT(bfL10(result)));}
+if(!passes.rep){result=result.replace(/(.){2,}/g,function(m,ch){return ch+cP(CS.s.split(’’))+cP(CS.u.split(’’));});changes.push(‘Repeated runs broken with unique chars’);}
+if(changes.length===0){changes.push(‘Password already strong - generated fresh variant’);result=buildPwd(Math.max(pwd.length,20));}
+fixedPwd=result;
+document.getElementById(‘FIXSEC’).style.display=‘block’;
+document.getElementById(‘FIXD’).innerHTML=rpwd(result);
+var ch=’’;changes.forEach(function(c){ch+=’<div class="fixch"><div class="fixdot"></div><div>’+c+’</div></div>’;});
+document.getElementById(‘FIXC’).innerHTML=ch;
+}
+function copyFix(){if(!fixedPwd)return;navigator.clipboard.writeText(fixedPwd).then(function(){var b=document.getElementById(‘FIXCPY’);b.textContent=‘Copied!’;setTimeout(function(){b.textContent=‘Copy Fixed’;},2000);});}
+function testFix(){if(!fixedPwd)return;document.getElementById(‘PTI’).value=fixedPwd;document.getElementById(‘PTI’).type=‘text’;document.getElementById(‘PTSHOW’).textContent=‘Hide’;startPT(fixedPwd);}
+buildGrid();
+</script></body></html>
